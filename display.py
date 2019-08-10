@@ -3,6 +3,8 @@ import numpy as np
 
 import threading
 
+import matplotlib.animation as animation
+
 
 class Display:
     def __init__(self):
@@ -19,29 +21,30 @@ class Display:
         # self.fig.show(block=True)
         # print('past')
 
-        def onclick(event):
-            print('test')
-            self.update(self.x, self.alpha)
+        # def onclick(event):
+        #     print('test')
+        #     self.update(self.x, self.alpha)
 
-        cid = self.fig.canvas.mpl_connect('draw_event', onclick)
+        # cid = self.fig.canvas.mpl_connect('draw_event', onclick)
+        self.lock = threading.Lock()
 
 
-    def eventloop(self):
+    def start(self):
+        ani = animation.FuncAnimation(self.fig, self.update, interval = 30)
         plt.show()
-        print('exited')
-        # while 1:
-        #     plt.pause(0.001)
-            # self.update(self.x,self.alpha)
-            # self.fig.draw()
-
 
     def save(self,x,alpha):
+        self.lock.acquire()
         self.x = x
         self.alpha = alpha
+        self.lock.release()
 
-    def update(self,x,alpha):
-        endpoint_y = self.L * np.cos(alpha)
-        endpoint_x = self.L * np.sin(alpha) + x
-        self.line.set_data([x,endpoint_x], [0,endpoint_y])
-        self.fig.canvas.draw_idle()
+    def update(self,frame):
+        print(frame)
+        if self.lock.acquire(blocking=False):
+            endpoint_y = self.L * np.cos(self.alpha)
+            endpoint_x = self.L * np.sin(self.alpha) + self.x
+            self.lock.release()
+            self.line.set_data([self.x,endpoint_x], [0,endpoint_y])
+        return self.line,
         

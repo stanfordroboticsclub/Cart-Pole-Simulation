@@ -17,5 +17,5 @@ def testing():
 
 t = threading.Thread(target=testing, daemon= True)
 t.start()
-d.eventloop()
+d.start()
 
