@@ -29,7 +29,11 @@ class Pendulum:
         m = 1
         l = 1
         A = np.array([[0,                    1],
-                      [-g*m*np.cos(theta)/l, 0]])
+                      [-g*np.cos(theta)/l, 0]])
+
+
+        # theta_dd = - g*sin(theta)/l
+
         return A
 
     def Discrete(self, state = None):
