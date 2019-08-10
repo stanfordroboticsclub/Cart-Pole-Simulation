@@ -34,8 +34,8 @@ class Display:
     def redraw(self,frame):
         print(frame)
         if self.lock.acquire(blocking=False):
-            endpoint_y = self.L * np.cos(self.alpha)
-            endpoint_x = self.L * np.sin(self.alpha) + self.x
+            endpoint_y = -self.L * np.cos(self.alpha)
+            endpoint_x =  self.L * np.sin(self.alpha) + self.x
             self.lock.release()
             self.line.set_data([self.x,endpoint_x], [0,endpoint_y])
             return self.line,

@@ -13,40 +13,41 @@ class Pendulum:
     # x_n+1 = Ad * x
 
     def __init__(self, init):
-        pass
-
         self.state = np.array(init)
+        self.dt = 0.01
+
+        self.g = 1
+        self.m = 1
+        self.l = 1
 
 
-    def A(self, state = None):
+    def linearize(self, state = None):
         if state == None:
             state = self.state
 
         theta = state[0]
 
         # got this from jacojian of ODE
-        g = 1
-        m = 1
-        l = 1
+        g = self.g
+        m = self.m
+        l = self.l
         A = np.array([[0,                    1],
-                      [-g*np.cos(theta)/l, 0]])
+                      [-g*np.cos(theta)/l, -0.1]])
 
+        B = np.array([0,0])
 
-        # theta_dd = - g*sin(theta)/l
+        return np.eye(A.shape[0]) + self.dt*A, dt*B
 
-        return A
-
-    def Discrete(self, state = None):
+    def next(self, u = None):
         dt = 0.01
-        A = self.A(state)
-        return np.eye(A.shape[0]) + dt * A
+        g = self.g
+        m = self.m
+        l = self.l
 
-    def next(self):
-        theta = self.state[0]
-        theta_d = self.state[1]
+        x_d = np.array( [self.state[1], -g*np.sin(self.state[0])/l -0.1*self.state[1] ])
+        self.state  =  self.state + x_d * self.dt
 
-        theta_dd = -m*g*sin(theta)/l
-        theta_d = -m*g*sin(theta)/l
+        return self.state
 
 
         
