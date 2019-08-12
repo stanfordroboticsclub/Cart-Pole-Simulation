@@ -20,7 +20,7 @@ class Display:
         self.lock = threading.Lock()
 
     def start(self, to_run):
-        thread = threading.Thread(target=to_run, daemon= True)
+        thread = threading.Thread(target=to_run, daemon=True)
         thread.start()
         ani = animation.FuncAnimation(self.fig, self.redraw, interval = 30,blit = True)
         plt.show()
@@ -32,7 +32,6 @@ class Display:
         self.lock.release()
 
     def redraw(self,frame):
-        print(frame)
         if self.lock.acquire(blocking=False):
             endpoint_y = -self.L * np.cos(self.alpha)
             endpoint_x =  self.L * np.sin(self.alpha) + self.x

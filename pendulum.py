@@ -14,7 +14,7 @@ class Pendulum:
 
     def __init__(self, init):
         self.state = np.array(init)
-        self.dt = 0.01
+        self.dt = 0.1
 
         self.g = 1
         self.m = 1
@@ -34,17 +34,16 @@ class Pendulum:
         A = np.array([[0,                    1],
                       [-g*np.cos(theta)/l, -0.1]])
 
-        B = np.array([0,0])
+        B = np.array([0,1])
 
-        return np.eye(A.shape[0]) + self.dt*A, dt*B
+        return np.eye(A.shape[0]) + self.dt*A, self.dt*B
 
     def next(self, u = None):
-        dt = 0.01
         g = self.g
         m = self.m
         l = self.l
 
-        x_d = np.array( [self.state[1], -g*np.sin(self.state[0])/l -0.1*self.state[1] ])
+        x_d = np.array( [self.state[1], -g*np.sin(self.state[0])/l -0.1 * self.state[1] + u[0] ])
         self.state  =  self.state + x_d * self.dt
 
         return self.state
