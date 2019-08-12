@@ -14,7 +14,7 @@ class Pendulum:
 
     def __init__(self, init):
         self.state = np.array(init)
-        self.dt = 0.1
+        self.dt = 0.05
 
         self.g = 1
         self.m = 1

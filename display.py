@@ -18,11 +18,13 @@ class Display:
 
         self.line, = self.ax.plot([], [], 'o-', lw=2)
         self.lock = threading.Lock()
+        self.x = 0
+        self.alpha = 0
 
     def start(self, to_run):
         thread = threading.Thread(target=to_run, daemon=True)
         thread.start()
-        ani = animation.FuncAnimation(self.fig, self.redraw, interval = 30,blit = True)
+        ani = animation.FuncAnimation(self.fig, self.redraw, interval = 10,blit = True)
         plt.show()
 
     def update(self,x,alpha):
