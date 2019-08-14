@@ -12,8 +12,8 @@ class System:
         raise NotImplemented
 
 class Pendulum:
-    self.N = 2
-    self.M = 1
+    N = 2
+    M = 1
     def __init__(self, init):
         # state = [angle in radians from vertical down going ccw]
         #         [                             angular velocity]
@@ -51,8 +51,8 @@ class Pendulum:
 
         
 class CartPole:
-    self.N = 4
-    self.M = 1
+    N = 4
+    M = 1
     def __init__(self, init):
         # state = [Cart velocity    ]
         #         [Position on rail ]
