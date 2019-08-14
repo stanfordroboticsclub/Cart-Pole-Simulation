@@ -12,7 +12,7 @@ p = Pendulum(init)
 
 def testing():
 
-    N = 1000
+    N = 400
     sleep(1)
 
     U = cp.Variable((N,  1))
@@ -25,7 +25,6 @@ def testing():
 
     while 1:
         const = []
-
         # const.append( X <=  0.1)
         # const.append( X >= -0.1)
         const.append( X[0,:] == np.zeros((2)))
@@ -33,18 +32,18 @@ def testing():
         p.state = np.array(init)
         states[0,:] = p.state
         for i in range(N):
-            print(i)
+            # print(i)
             A, B = p.linearize()
 
             p.next(control[i])
             states[i+1,:] = p.state
             const.append( X[i+1,:] == A @ X[i,:] + B @ U[i,:] ) 
 
-            sleep(0.005)
+            sleep(0.001)
             d.update(0,p.state[0])
 
-        const.append( U + control <=  0.1)
-        const.append( U + control >= -0.1)
+        const.append( U + control <=  0.5)
+        const.append( U + control >= -0.5)
         # const.append( X<=  0.3)
         # const.append( X>= -0.3)
 
@@ -56,10 +55,6 @@ def testing():
                 0
                 # 1* cp.sum((U_p)**2)
                 # 0.1* cp.sum((U_p[1:] - U_p[:-1])**2)
-            
-
-
-
 
         prob = cp.Problem( cp.Minimize( cost), const)
         prob.solve()
@@ -69,7 +64,7 @@ def testing():
             print("angle", b[0], "vel", b[1], "act", a[0])
         control += U.value
         
-        sleep(2)
+        sleep(0.1)
 
 
 d.start(testing)

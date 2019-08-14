@@ -20,6 +20,27 @@ class Pendulum:
         self.m = 1
         self.l = 1
 
+    # https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-832-underactuated-robotics-spring-2009/readings/MIT6_832s09_read_ch03.pdf
+    # 2x ̈ + θ ̈cos θ − θ ̇2 sin θ = f
+    # x ̈ cos θ + θ ̈ + sin θ = zero
+
+    # [2,         cos(theta)] @ [    xdd] = [f + thetad^2 sin(theta)]
+    # [cos(theta),        1 ] @ [thetadd] = [            -sin(theta)]
+    def calc_dynamics(self):
+        xd, x, thetad, theta = symbols('xd x thetad theta')
+        f                    = symbols('f')
+
+        # accel = Matrix([xdd, thetadd])
+        accel = Matrix([[2, cos(theta)],[cos(theta), 1]]).inv() @ Matrix([f + thetad**2 * sin(theta), -sin(theta)]) 
+        xdd, thetadd = accel
+
+        dyn_sym =     Matrix([xdd, xd, thetadd, thetad])
+        A_sym = dyn.jacobian([xd,  x,  thetad,  theta ])
+        B_sym = dyn.jacobian([f])
+
+        self.dyn = lambdify( [[xd,x,thetad, theta], [f]], dyn_sym, 'numpy')
+        self.A   = lambdify( [[xd,x,thetad, theta], [f]], A_sym  , 'numpy')
+        self.B   = lambdify( [[xd,x,thetad, theta], [f]], B_sym  , 'numpy')
 
     def linearize(self, state = None):
         if state == None:
