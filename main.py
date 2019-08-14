@@ -1,6 +1,6 @@
 
 from display import Display
-from pendulum import Pendulum
+from systems import Pendulum
 from time import sleep
 import cvxpy as cp
 import numpy as np
@@ -10,30 +10,27 @@ d = Display()
 init = [0,0]
 p = Pendulum(init)
 
-def testing():
+def main():
+    T = 400
+    N = p.N
+    M = p.M
 
-    N = 400
     sleep(1)
 
-    U = cp.Variable((N,  1))
-    X = cp.Variable((N+1,2))
+    U = cp.Variable((T,  M))
+    X = cp.Variable((T+1,N))
 
-    const = []
-
-    states =  np.zeros((N+1,2))
-    control = np.zeros((N,  1))
-
+    control = np.zeros((T,  M))
+    states =  np.zeros((T+1,N))
     while 1:
         const = []
-        # const.append( X <=  0.1)
-        # const.append( X >= -0.1)
-        const.append( X[0,:] == np.zeros((2)))
+        const.append( X[0,:] == np.zeros((N)))
 
         p.state = np.array(init)
         states[0,:] = p.state
-        for i in range(N):
+        for i in range(T):
             # print(i)
-            A, B = p.linearize()
+            A, B = p.linearize(p.state, control[i])
 
             p.next(control[i])
             states[i+1,:] = p.state
@@ -42,13 +39,14 @@ def testing():
             sleep(0.001)
             d.update(0,p.state[0])
 
-        const.append( U + control <=  0.5)
-        const.append( U + control >= -0.5)
+        X_p = X + states
+        U_p = U + control
+
+        const.append( U_p <=  0.5)
+        const.append( U_p >= -0.5)
         # const.append( X<=  0.3)
         # const.append( X>= -0.3)
 
-        X_p = X + states
-        U_p = U + control
         cost = 1000*cp.sum((X_p[-1:,0] - np.pi)**2) + \
                1000*cp.sum((X_p[-1:,1]   )**2) +\
                 10* cp.sum((X_p[:,0]- np.pi)**2) + \
@@ -66,6 +64,5 @@ def testing():
         
         sleep(0.1)
 
-
-d.start(testing)
+d.start(main)
 
