@@ -1,6 +1,7 @@
 
 
 import numpy as np
+import sympy as sp
 
 
 class System:
@@ -54,12 +55,13 @@ class CartPole:
     N = 4
     M = 1
     def __init__(self, init):
-        # state = [Cart velocity    ]
-        #         [Position on rail ]
-        #         [Angular velocity ]
-        #         [angle?? (from MIT]
+        # state = [Cart velocity          ]
+        #         [Position on rail       ]
+        #         [Angular velocity       ]
+        #         [angle from downward ccw]
         self.state = np.array(init)
-        self.dt = 0.05
+        self.dt = 0.1
+        self.calc_dynamics()
 
     # https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-832-underactuated-robotics-spring-2009/readings/MIT6_832s09_read_ch03.pdf
     # 2x ̈ + θ ̈cos θ − θ ̇2 sin θ = f
@@ -68,34 +70,33 @@ class CartPole:
     # [2,         cos(theta)] @ [    xdd] = [f + thetad^2 sin(theta)]
     # [cos(theta),        1 ] @ [thetadd] = [            -sin(theta)]
     def calc_dynamics(self):
-        xd, x, thetad, theta = symbols('xd x thetad theta')
-        f                    = symbols('f')
+        xd, x, thetad, theta = sp.symbols('xd x thetad theta')
+        f                    = sp.symbols('f')
 
         # accel = Matrix([xdd, thetadd])
-        accel = Matrix([[2, cos(theta)],[cos(theta), 1]]).inv() @ Matrix([f + thetad**2 * sin(theta), -sin(theta)]) 
+        accel = sp.Matrix([[2,       sp.cos(theta)],\
+                           [sp.cos(theta),      1]]).inv() @ sp.Matrix([f + thetad**2 * sp.sin(theta), \
+                                                                                      -sp.sin(theta)]) 
         xdd, thetadd = accel
 
-        dyn_sym =     Matrix([xdd, xd, thetadd, thetad])
-        A_sym = dyn.jacobian([xd,  x,  thetad,  theta ])
-        B_sym = dyn.jacobian([f])
+        dyn_sym =      sp.Matrix([xdd, xd, thetadd, thetad])
+        A_sym = dyn_sym.jacobian([xd,  x,  thetad,  theta ])
+        B_sym = dyn_sym.jacobian([f])
 
-        self.dyn = lambdify( [[xd,x,thetad, theta], [f]], dyn_sym, 'numpy')
-        self.A   = lambdify( [[xd,x,thetad, theta], [f]], A_sym  , 'numpy')
-        self.B   = lambdify( [[xd,x,thetad, theta], [f]], B_sym  , 'numpy')
+        array_dyn = sp.lambdify( [[xd,x,thetad, theta], [f]], dyn_sym.T, 'numpy')
+        self.dyn = lambda s,u: array_dyn(s,u)[0]
+
+        self.A   = sp.lambdify( [[xd,x,thetad, theta], [f]], A_sym  , 'numpy')
+        self.B   = sp.lambdify( [[xd,x,thetad, theta], [f]], B_sym  , 'numpy')
 
     def linearize(self, state, u):
-        if state == None:
-            state = self.state
-
-        u = np.zeros((self.M))
-
         A = self.A(state, u)
         B = self.B(state, u)
 
         return np.eye(A.shape[0]) + self.dt*A, self.dt*B
 
     def next(self, u = None):
-        if u == None:
+        if u is None:
             u = np.zeros((self.M))
 
         self.state  =  self.state + self.dyn(self.state, u) * self.dt
