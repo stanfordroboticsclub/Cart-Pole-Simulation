@@ -75,15 +75,18 @@ def main():
             # print(p.state)
             states[i+1,:] = p.state
             const.append( X[i+1,:] == A @ X[i,:] + B @ U[i,:] ) 
-
-            sleep(0.002)
+            
+            sleep(0.010)
+            # if atempt > 100:
+            #     sleep(0.020)
             d.update(p.state[1],p.state[3])
 
-        for i in range(50):
-            u = np.clip(K @ (p.state - target),-1,1)
-            p.next(-u)
-            sleep(0.01)
-            d.update(p.state[1],p.state[3])
+        if atempt > 100:
+            for i in range(300):
+                u = np.clip(K @ (p.state - target),-1,1)
+                p.next(-u)
+                sleep(0.02)
+                d.update(p.state[1],p.state[3])
 
         X_p = X + states
         U_p = U + control
