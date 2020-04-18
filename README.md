@@ -1,5 +1,5 @@
-##Cart Pole Simulation
-
+Cart Pole Simulation
+---
 
 ![Screenshot](https://github.com/stanfordroboticsclub/Cart-Pole-Simulation/blob/master/example.png)
 
